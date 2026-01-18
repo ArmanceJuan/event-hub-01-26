@@ -1,13 +1,13 @@
-// src/api/controllers/EventController.ts
-import { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 
 import { CreateEventUseCase } from "../../application/usecases/CreateEventUseCase";
 import { GetAllEventsUseCase } from "../../application/usecases/GetAllEventsUseCase";
 import { GetEventByIdUseCase } from "../../application/usecases/GetEventByIdUseCase";
 import { UpdateEventUseCase } from "../../application/usecases/UpdateEventUseCase";
-import { CreateEventDTO } from "../dto/create.dto";
-import { UpdateEventDTO } from "../dto/update.dto";
 import { DeleteEventUseCase } from "../../application/usecases/DeleteEventUseCase";
+
+import { CreateEventDTO } from "../dto";
+import { UpdateEventDTO } from "../dto";
 
 export class EventController {
   constructor(
@@ -18,117 +18,104 @@ export class EventController {
     private readonly deleteEventUseCase: DeleteEventUseCase
   ) {}
 
-  // POST /api/events
   async create(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = req.user;
+      if (!user) {
+        return res.jsonError("Unauthorized", 403);
+      }
       const dto = req.body as CreateEventDTO;
 
-      const event = await this.createEventUseCase.execute({
-        title: dto.title,
-        description: dto.description,
+      const created = await this.createEventUseCase.execute({
+        ...dto,
+        organizerId: user.id,
         startDate: new Date(dto.startDate),
-        venueId: dto.venueId,
-        capacity: dto.capacity,
-        price: dto.price,
-        organizerId: dto.organizerId,
-        categoryId: dto.categoryId,
-        imageUrl: dto.imageUrl,
       });
 
-      return res.status(201).json({
-        success: true,
-        data: event,
-      });
-    } catch (error) {
-      next(error);
+      return res.jsonSuccess(created, 201);
+    } catch (err) {
+      next(err);
     }
   }
 
-  // GET /api/events
   async getAll(req: Request, res: Response, next: NextFunction) {
     try {
       const events = await this.getAllEventsUseCase.execute();
-      return res.status(200).json({
-        success: true,
-        data: events,
-      });
-    } catch (error) {
-      next(error);
+
+      return res.jsonSuccess(events, 200);
+    } catch (err) {
+      next(err);
     }
   }
 
-  // GET /api/events/:id
   async getById(req: Request, res: Response, next: NextFunction) {
     try {
-      const rawId = req.params.id;
+      const idParam = req.params.id;
 
-      if (!rawId || Array.isArray(rawId)) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid event id" });
+      if (!idParam || Array.isArray(idParam)) {
+        return res.jsonError("Invalid event id", 400);
       }
 
-      const event = await this.getEventByIdUseCase.execute(rawId);
+      const event = await this.getEventByIdUseCase.execute(idParam);
 
       if (!event) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Event not found" });
+        return res.jsonError("Event not found", 404);
       }
 
-      return res.status(200).json({ success: true, data: event });
-    } catch (error) {
-      next(error);
+      return res.jsonSuccess(event, 200);
+    } catch (err) {
+      next(err);
     }
   }
 
-  // PUT /api/events/:id
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const rawId = req.params.id;
-      if (!rawId || Array.isArray(rawId)) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid event id" });
+      const idParam = req.params.id;
+
+      if (!idParam || Array.isArray(idParam)) {
+        return res.jsonError("Invalid event id", 400);
       }
 
       const dto = req.body as UpdateEventDTO;
 
-      const updated = await this.updateEventUseCase.execute(rawId, {
-        ...dto,
-        startDate: new Date(dto.startDate),
-      });
+      const requesterId = req.user?.id;
+      if (!requesterId) return res.jsonError("Unauthorized", 401);
 
-      return res.status(200).json({ success: true, data: updated });
-    } catch (e: any) {
-      if (e?.message === "Event not found") {
-        return res
-          .status(404)
-          .json({ success: false, message: "Event not found" });
+      const updated = await this.updateEventUseCase.execute(
+        idParam,
+        { ...dto, startDate: new Date(dto.startDate) },
+        requesterId
+      );
+
+      return res.jsonSuccess(updated, 200);
+    } catch (err: any) {
+      if (err?.message === "Event not found") {
+        return res.jsonError("Event not found", 404);
       }
-      next(e);
+      next(err);
     }
   }
 
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const rawId = req.params.id;
-      if (!rawId || Array.isArray(rawId)) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid event id" });
+      const idParam = req.params.id;
+
+      if (!idParam || Array.isArray(idParam)) {
+        return res.jsonError("Invalid event id", 400);
       }
 
-      await this.deleteEventUseCase.execute(rawId);
+      const requesterId = req.user?.id;
+      if (!requesterId) return res.jsonError("Unauthorized", 401);
+
+      await this.deleteEventUseCase.execute(idParam, requesterId);
+      return res.status(204).send();
 
       return res.status(204).send();
-    } catch (e: any) {
-      if (e?.message === "Event not found") {
-        return res
-          .status(404)
-          .json({ success: false, message: "Event not found" });
+    } catch (err: any) {
+      if (err?.message === "Event not found") {
+        return res.jsonError("Event not found", 404);
       }
-      next(e);
+      next(err);
     }
   }
 }

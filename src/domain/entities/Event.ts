@@ -39,7 +39,7 @@ export class Event {
     if (!Number.isInteger(props.capacity) || props.capacity < 1)
       throw new Error("Capacity must be at least 1");
     if (props.price !== undefined && props.price < 0)
-      throw new Error("Price must be positive");
+      throw new Error("Price must be non-negative");
     if (!props.organizerId || props.organizerId.trim() === "")
       throw new Error("Organizer is required");
     if (!props.categoryId || props.categoryId.trim() === "")

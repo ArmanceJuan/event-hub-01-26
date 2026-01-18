@@ -42,4 +42,30 @@ describe("DeleteEventUseCase", () => {
   it("échoue si l'event n'existe pas", async () => {
     await expect(useCase.execute("unknown")).rejects.toThrow("Event not found");
   });
+
+  it("échoue si l'utilisateur n'est pas l'organisateur (forbidden)", async () => {
+    const repo = new InMemoryEventRepository();
+    const usecase = new DeleteEventUseCase(repo);
+
+    await repo.save(
+      new Event({
+        id: "event-1",
+        title: "Coldplay",
+        startDate: new Date(Date.now() + 86400000),
+        venueId: "venue-1",
+        capacity: 10,
+        organizerId: "owner-1",
+        categoryId: "cat-1",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+    );
+
+    await expect(
+      usecase.execute("event-1", "intruder-1")
+    ).rejects.toMatchObject({
+      message: "Forbidden",
+      statusCode: 403,
+    });
+  });
 });

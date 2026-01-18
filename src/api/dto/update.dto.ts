@@ -5,7 +5,6 @@ export interface UpdateEventDTO {
   venueId: string;
   capacity: number;
   price?: number;
-  organizerId: string;
   categoryId: string;
   imageUrl?: string;
 }

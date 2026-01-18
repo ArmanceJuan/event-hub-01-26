@@ -1,18 +1,24 @@
+// src/application/usecases/DeleteEventUseCase.ts
 import { EventRepositoryInterface } from "../../domain/interfaces/EventRepositoryInterface";
 
 export class DeleteEventUseCase {
-  constructor(private readonly repository: EventRepositoryInterface) {}
+  constructor(private readonly eventRepository: EventRepositoryInterface) {}
 
-  async execute(id: string): Promise<void> {
-    if (!id || id.trim() === "") {
-      throw new Error("Event id is required");
-    }
+  async execute(eventId: string, requesterId: string): Promise<void> {
+    const existing = await this.eventRepository.findById(eventId);
 
-    const existing = await this.repository.findById(id);
     if (!existing) {
-      throw new Error("Event not found");
+      const err: any = new Error("Event not found");
+      err.statusCode = 404;
+      throw err;
     }
 
-    await this.repository.delete(id);
+    if (existing.organizerId !== requesterId) {
+      const err: any = new Error("Forbidden");
+      err.statusCode = 403;
+      throw err;
+    }
+
+    await this.eventRepository.delete(eventId);
   }
 }

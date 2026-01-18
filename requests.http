@@ -1,22 +1,45 @@
 @baseUrl=http://localhost:8000/api
-@eventId=e2da51c4-a566-4a81-8b21-428498feb04d
+@eventId=1d3f2d70-2322-4007-a028-e779709be294
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ1Nzc1NzdjLTk3ZjUtNDViYS04OWMyLWQ0MzU1NTgzNWUzMiIsInJvbGUiOiJPUkdBTklaRVIiLCJpYXQiOjE3Njg3NTUxOTMsImV4cCI6MTc2OTM1OTk5M30.84WJ315_iyFIqrtt66RjrLj3UKGGKUfF-BYxUOUrdLE
+
+# Auth
+## User
+### Register user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "hello@test.com",
+  "password": "test123",
+  "role": "ORGANIZER"
+}
+
+### Login user
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "hello@test.com",
+  "password": "test123"
+}
 
 # Events
 ## Create
 ### Create Event - success
 POST {{baseUrl}}/events
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-  "title": "Coldplay",
-  "description": "One year again",
-  "startDate": "2030-01-01T10:00:00.000Z",
-  "venueId": "venue-1",
-  "capacity": 100,
-  "price": 20,
+  "title": "Imagine Dragons",
+  "description": "Nouvelle description",
+  "startDate": "2031-01-01T10:00:00.000Z",
+  "venueId": "venue-99",
+  "capacity": 150,
+  "price": 25,
   "organizerId": "user-1",
   "categoryId": "cat-1",
-  "imageUrl": "https://example.com/image.jpg"
+  "imageUrl": "https://example.com/new-image.jpg"
 }
 
 ### Create Event - missing title
@@ -52,18 +75,21 @@ Content-Type: application/json
 ## Get
 ### Get all events
 GET {{baseUrl}}/events
+Authorization: Bearer {{token}}
 
 ### Get event by id
 GET {{baseUrl}}/events/{{eventId}}
+Authorization: Bearer {{token}}
 
 ## Update
 ### Update event (PUT) - remplace <ID>
 PUT {{baseUrl}}/events/{{eventId}}
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-  "title": "Concert de Jazz de la nouvel année",
-  "description": "Nouvelle description",
+  "title": "Imagine Dragons",
+  "description": "Mise à jour",
   "startDate": "2031-01-01T10:00:00.000Z",
   "venueId": "venue-99",
   "capacity": 150,
@@ -76,3 +102,4 @@ Content-Type: application/json
 ## Delete
 ### Delete event (DELETE) - supprime <ID>
 DELETE {{baseUrl}}/events/{{eventId}}
+Authorization: Bearer {{token}}

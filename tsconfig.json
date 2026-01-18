@@ -22,5 +22,7 @@
     "noFallthroughCasesInSwitch": false,
     "strict": false,
     "strictNullChecks": true
-  }
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": ["node_modules", "dist"]
 }

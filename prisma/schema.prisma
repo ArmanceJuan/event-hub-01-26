@@ -12,6 +12,23 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  PARTICIPANT
+  ORGANIZER
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(ORGANIZER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  events       Event[]  @relation("OrganizerEvents")
+}
+
 model Event {
   id          String   @id
   title       String
@@ -25,5 +42,8 @@ model Event {
   imageUrl    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  organizer   User     @relation("OrganizerEvents", fields: [organizerId], references: [id])
 }
+
 
