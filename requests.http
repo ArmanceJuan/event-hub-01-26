@@ -1,0 +1,78 @@
+@baseUrl=http://localhost:8000/api
+@eventId=e2da51c4-a566-4a81-8b21-428498feb04d
+
+# Events
+## Create
+### Create Event - success
+POST {{baseUrl}}/events
+Content-Type: application/json
+
+{
+  "title": "Coldplay",
+  "description": "One year again",
+  "startDate": "2030-01-01T10:00:00.000Z",
+  "venueId": "venue-1",
+  "capacity": 100,
+  "price": 20,
+  "organizerId": "user-1",
+  "categoryId": "cat-1",
+  "imageUrl": "https://example.com/image.jpg"
+}
+
+### Create Event - missing title
+POST {{baseUrl}}/events
+Content-Type: application/json
+
+{
+  "title": "",
+  "description": "Sans titre",
+  "startDate": "2030-01-01T10:00:00.000Z",
+  "venueId": "venue-1",
+  "capacity": 100,
+  "price": 20,
+  "organizerId": "user-1",
+  "categoryId": "cat-1"
+}
+
+### Create Event - past date
+POST {{baseUrl}}/events
+Content-Type: application/json
+
+{
+  "title": "Event passé",
+  "description": "Date invalide",
+  "startDate": "2020-01-01T10:00:00.000Z",
+  "venueId": "venue-1",
+  "capacity": 100,
+  "price": 20,
+  "organizerId": "user-1",
+  "categoryId": "cat-1"
+}
+
+## Get
+### Get all events
+GET {{baseUrl}}/events
+
+### Get event by id
+GET {{baseUrl}}/events/{{eventId}}
+
+## Update
+### Update event (PUT) - remplace <ID>
+PUT {{baseUrl}}/events/{{eventId}}
+Content-Type: application/json
+
+{
+  "title": "Concert de Jazz de la nouvel année",
+  "description": "Nouvelle description",
+  "startDate": "2031-01-01T10:00:00.000Z",
+  "venueId": "venue-99",
+  "capacity": 150,
+  "price": 25,
+  "organizerId": "user-1",
+  "categoryId": "cat-1",
+  "imageUrl": "https://example.com/new-image.jpg"
+}
+
+## Delete
+### Delete event (DELETE) - supprime <ID>
+DELETE {{baseUrl}}/events/{{eventId}}
